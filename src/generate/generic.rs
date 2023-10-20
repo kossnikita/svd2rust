@@ -310,7 +310,7 @@ pub mod raw {
         FI: FieldSpec,
     {
         pub(crate) w: &'a mut W<REG>,
-        pub(crate) offset: u8,
+        pub(crate) o: u8,
         _field: marker::PhantomData<(FI, Safety)>,
     }
 
@@ -322,10 +322,10 @@ pub mod raw {
         /// Creates a new instance of the writer
         #[allow(unused)]
         #[inline(always)]
-        pub(crate) fn new(w: &'a mut W<REG>, offset: u8) -> Self {
+        pub(crate) fn new(w: &'a mut W<REG>, o: u8) -> Self {
             Self {
                 w,
-                offset,
+                o,
                 _field: marker::PhantomData,
             }
         }
@@ -337,7 +337,7 @@ pub mod raw {
         bool: From<FI>,
     {
         pub(crate) w: &'a mut W<REG>,
-        pub(crate) offset: u8,
+        pub(crate) o: u8,
         _field: marker::PhantomData<(FI, M)>,
     }
 
@@ -349,10 +349,10 @@ pub mod raw {
         /// Creates a new instance of the writer
         #[allow(unused)]
         #[inline(always)]
-        pub(crate) fn new(w: &'a mut W<REG>, offset: u8) -> Self {
+        pub(crate) fn new(w: &'a mut W<REG>, o: u8) -> Self {
             Self {
                 w,
-                offset,
+                o,
                 _field: marker::PhantomData,
             }
         }
@@ -435,12 +435,12 @@ impl<FI> BitReader<FI> {
     }
     /// Returns `true` if the bit is clear (0).
     #[inline(always)]
-    pub fn bit_is_clear(&self) -> bool {
+    pub const fn bit_is_clear(&self) -> bool {
         !self.bit()
     }
     /// Returns `true` if the bit is set (1).
     #[inline(always)]
-    pub fn bit_is_set(&self) -> bool {
+    pub const fn bit_is_set(&self) -> bool {
         self.bit()
     }
 }
@@ -510,8 +510,8 @@ macro_rules! impl_bit_proxy {
             /// Writes bit to the field
             #[inline(always)]
             pub fn bit(self, value: bool) -> &'a mut W<REG> {
-                self.w.bits &= !(REG::Ux::one() << self.offset);
-                self.w.bits |= (REG::Ux::from(value) & REG::Ux::one()) << self.offset;
+                self.w.bits &= !(REG::Ux::one() << self.o);
+                self.w.bits |= (REG::Ux::from(value) & REG::Ux::one()) << self.o;
                 self.w
             }
             /// Writes `variant` to the field
@@ -544,8 +544,8 @@ where
     /// Passing incorrect value can cause undefined behaviour. See reference manual
     #[inline(always)]
     pub unsafe fn bits(self, value: FI::Ux) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::mask::<WI>() << self.offset);
-        self.w.bits |= (REG::Ux::from(value) & REG::Ux::mask::<WI>()) << self.offset;
+        self.w.bits &= !(REG::Ux::mask::<WI>() << self.o);
+        self.w.bits |= (REG::Ux::from(value) & REG::Ux::mask::<WI>()) << self.o;
         self.w
     }
     /// Writes `variant` to the field
@@ -564,8 +564,8 @@ where
     /// Writes raw bits to the field
     #[inline(always)]
     pub fn bits(self, value: FI::Ux) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::mask::<WI>() << self.offset);
-        self.w.bits |= (REG::Ux::from(value) & REG::Ux::mask::<WI>()) << self.offset;
+        self.w.bits &= !(REG::Ux::mask::<WI>() << self.o);
+        self.w.bits |= (REG::Ux::from(value) & REG::Ux::mask::<WI>()) << self.o;
         self.w
     }
     /// Writes `variant` to the field
@@ -583,13 +583,13 @@ where
     /// Sets the field bit
     #[inline(always)]
     pub fn set_bit(self) -> &'a mut W<REG> {
-        self.w.bits |= REG::Ux::one() << self.offset;
+        self.w.bits |= REG::Ux::one() << self.o;
         self.w
     }
     /// Clears the field bit
     #[inline(always)]
     pub fn clear_bit(self) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::one() << self.offset);
+        self.w.bits &= !(REG::Ux::one() << self.o);
         self.w
     }
 }
@@ -602,7 +602,7 @@ where
     /// Sets the field bit
     #[inline(always)]
     pub fn set_bit(self) -> &'a mut W<REG> {
-        self.w.bits |= REG::Ux::one() << self.offset;
+        self.w.bits |= REG::Ux::one() << self.o;
         self.w
     }
 }
@@ -615,7 +615,7 @@ where
     /// Clears the field bit
     #[inline(always)]
     pub fn clear_bit(self) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::one() << self.offset);
+        self.w.bits &= !(REG::Ux::one() << self.o);
         self.w
     }
 }
@@ -628,7 +628,7 @@ where
     ///Clears the field bit by passing one
     #[inline(always)]
     pub fn clear_bit_by_one(self) -> &'a mut W<REG> {
-        self.w.bits |= REG::Ux::one() << self.offset;
+        self.w.bits |= REG::Ux::one() << self.o;
         self.w
     }
 }
@@ -641,7 +641,7 @@ where
     ///Sets the field bit by passing zero
     #[inline(always)]
     pub fn set_bit_by_zero(self) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::one() << self.offset);
+        self.w.bits &= !(REG::Ux::one() << self.o);
         self.w
     }
 }
@@ -654,7 +654,7 @@ where
     ///Toggle the field bit by passing one
     #[inline(always)]
     pub fn toggle_bit(self) -> &'a mut W<REG> {
-        self.w.bits |= REG::Ux::one() << self.offset;
+        self.w.bits |= REG::Ux::one() << self.o;
         self.w
     }
 }
@@ -667,7 +667,7 @@ where
     ///Toggle the field bit by passing zero
     #[inline(always)]
     pub fn toggle_bit(self) -> &'a mut W<REG> {
-        self.w.bits &= !(REG::Ux::one() << self.offset);
+        self.w.bits &= !(REG::Ux::one() << self.o);
         self.w
     }
 }
